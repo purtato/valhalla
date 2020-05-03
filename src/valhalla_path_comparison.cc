@@ -1,6 +1,6 @@
 #include "baldr/rapidjson_utils.h"
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <cstdint>
 #include <iostream>
@@ -31,7 +31,7 @@ using namespace valhalla::loki;
 using namespace valhalla::thor;
 using namespace valhalla::midgard;
 
-namespace bpo = boost::program_options;
+;
 
 void print_edge(GraphReader& reader,
                 const cost_ptr_t& costing,
@@ -160,7 +160,7 @@ void walk_edges(const std::string& shape, GraphReader& reader, const cost_ptr_t&
 
 // Main method for testing a single path
 int main(int argc, char* argv[]) {
-  bpo::options_description options(
+  cxxopts::options_description options(
       "valhalla_path_comparison " VALHALLA_VERSION "\n"
       "\n"
       " Usage: valhalla_path_comparison [options]\n"
@@ -176,25 +176,25 @@ int main(int argc, char* argv[]) {
 
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
-      "type,t", boost::program_options::value<std::string>(&routetype),
+      "type,t", cxxopts::value<std::string>(&routetype),
       "Route Type: auto|bicycle|pedestrian|auto-shorter")("shape,s",
-                                                          boost::program_options::value<std::string>(
+                                                          cxxopts::value<std::string>(
                                                               &shape),
                                                           "")(
-      "json,j", boost::program_options::value<std::string>(&json),
+      "json,j", cxxopts::value<std::string>(&json),
       R"(JSON Example: {"paths":[[{"lat":12.47,"lon":15.2},{"lat":12.46,"lon":15.21}],[{"lat":12.36,"lon":15.17},{"lat":12.37,"lon":15.18}]],"costing":"bicycle","costing_options":{"bicycle":{"use_roads":0.55,"use_hills":0.1}}})")
       // positional arguments
-      ("config", bpo::value<std::string>(&config), "Valhalla configuration file");
+      ("config", cxxopts::value<std::string>(&config), "Valhalla configuration file");
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("config", 1);
 
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
 
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
 
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"

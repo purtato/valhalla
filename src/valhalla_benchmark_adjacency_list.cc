@@ -1,4 +1,4 @@
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <cstdint>
 #include <iostream>
 #include <queue>
@@ -17,7 +17,7 @@ using namespace valhalla::midgard;
 using namespace valhalla::baldr;
 using namespace valhalla::sif;
 
-namespace bpo = boost::program_options;
+;
 
 /**
  * Benchmark of adjacency list. Constructs a large number of random numbers,
@@ -108,7 +108,7 @@ int Benchmark(const uint32_t n, const float maxcost, const float bucketsize) {
 
 int main(int argc, char* argv[]) {
 
-  bpo::options_description options(
+  cxxopts::options_description options(
       "valhalla " VALHALLA_VERSION "\n"
       "\n"
       " Usage: adjlistbenchmark [options]\n"
@@ -121,10 +121,10 @@ int main(int argc, char* argv[]) {
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.");
 
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).run(), vm);
-    bpo::notify(vm);
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).run(), vm);
+    cxxopts::notify(vm);
 
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"

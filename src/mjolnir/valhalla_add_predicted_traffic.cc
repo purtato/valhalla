@@ -12,7 +12,7 @@
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/binary_from_base64.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -30,7 +30,7 @@ namespace vm = valhalla::midgard;
 namespace vb = valhalla::baldr;
 namespace vj = valhalla::mjolnir;
 
-namespace bpo = boost::program_options;
+;
 namespace bpt = boost::property_tree;
 
 namespace {
@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
   unsigned int num_threads = std::thread::hardware_concurrency();
   bool summary = false;
 
-  bpo::options_description options("valhalla_add_predicted_traffic " VALHALLA_VERSION "\n"
+  cxxopts::options_description options("valhalla_add_predicted_traffic " VALHALLA_VERSION "\n"
                                    "\n"
                                    " Usage: valhalla_add_predicted_traffic [options]\n"
                                    "\n"
@@ -279,24 +279,24 @@ int main(int argc, char** argv) {
 
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
-      "concurrency,j", bpo::value<unsigned int>(&num_threads),
+      "concurrency,j", cxxopts::value<unsigned int>(&num_threads),
       "Number of threads to use.")("config,c",
-                                   boost::program_options::value<std::string>(&config_file_path),
+                                   cxxopts::value<std::string>(&config_file_path),
                                    "Path to the json configuration file.")(
-      "inline-config,i", boost::program_options::value<std::string>(&inline_config),
-      "Inline json config.")("summary,s", bpo::value<bool>(&summary),
+      "inline-config,i", cxxopts::value<std::string>(&inline_config),
+      "Inline json config.")("summary,s", cxxopts::value<bool>(&summary),
                              "Output summary information about traffic coverage for the tile set")
       // positional arguments
-      ("traffic-tile-dir,t", bpo::value<std::string>(&traffic_tile_dir),
+      ("traffic-tile-dir,t", cxxopts::value<std::string>(&traffic_tile_dir),
        "Location of traffic csv tiles.");
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("traffic-tile-dir", 1);
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"
               << "This is a bug, please report it at " PACKAGE_BUGREPORT << "\n";

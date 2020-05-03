@@ -9,7 +9,7 @@
 
 #include "baldr/rapidjson_utils.h"
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <ostream>
 
@@ -20,7 +20,7 @@
 #include "baldr/tilehierarchy.h"
 #include "filesystem.h"
 
-namespace bpo = boost::program_options;
+;
 
 using namespace valhalla::baldr;
 using namespace valhalla::midgard;
@@ -39,7 +39,7 @@ struct EdgeAndDirection {
 
 bool ParseArguments(int argc, char* argv[]) {
 
-  bpo::options_description options(
+  cxxopts::options_description options(
       "ways_to_edges " VALHALLA_VERSION "\n"
       "\n"
       " Usage: ways_to_edges [options]\n"
@@ -51,20 +51,20 @@ bool ParseArguments(int argc, char* argv[]) {
 
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
-      "config,c", boost::program_options::value<filesystem::path>(&config_file_path)->required(),
+      "config,c", cxxopts::value<filesystem::path>(&config_file_path)->required(),
       "Path to the json configuration file.")
       // positional arguments
       ("input_files",
-       boost::program_options::value<std::vector<std::string>>(&input_files)->multitoken());
+       cxxopts::value<std::vector<std::string>>(&input_files)->multitoken());
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("input_files", 16);
 
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
 
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"

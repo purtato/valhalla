@@ -1,6 +1,6 @@
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <cmath>
 #include <cstdint>
@@ -50,7 +50,7 @@ using namespace valhalla::sif;
 using namespace valhalla::thor;
 using namespace valhalla::meili;
 
-namespace bpo = boost::program_options;
+;
 
 namespace {
 
@@ -490,7 +490,7 @@ valhalla::DirectionsLeg DirectionsTest(valhalla::Api& api,
 
 // Main method for testing a single path
 int main(int argc, char* argv[]) {
-  bpo::options_description poptions(
+  cxxopts::options_description poptions(
       "valhalla_run_route " VALHALLA_VERSION "\n"
       "\n"
       " Usage: valhalla_run_route [options]\n"
@@ -508,7 +508,7 @@ int main(int argc, char* argv[]) {
 
   poptions.add_options()("help,h", "Print this help message.")("version,v",
                                                                "Print the version of this software.")(
-      "json,j", boost::program_options::value<std::string>(&json),
+      "json,j", cxxopts::value<std::string>(&json),
       "JSON Example: "
       "'{\"locations\":[{\"lat\":40.748174,\"lon\":-73.984984,\"type\":\"break\",\"heading\":200,"
       "\"name\":\"Empire State Building\",\"street\":\"350 5th Avenue\",\"city\":\"New "
@@ -518,19 +518,19 @@ int main(int argc, char* argv[]) {
       "York\",\"state\":\"NY\",\"postal_code\":\"10017-3507\",\"country\":\"US\"}],\"costing\":"
       "\"auto\",\"directions_options\":{\"units\":\"miles\"}}'")(
       "match-test", "Test RouteMatcher with resulting shape.")(
-      "multi-run", bpo::value<uint32_t>(&iterations),
+      "multi-run", cxxopts::value<uint32_t>(&iterations),
       "Generate the route N additional times before exiting.")
       // positional arguments
-      ("config", bpo::value<std::string>(&config), "Valhalla configuration file");
+      ("config", cxxopts::value<std::string>(&config), "Valhalla configuration file");
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("config", 1);
 
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(poptions).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(poptions).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"
               << "This is a bug, please report it at " PACKAGE_BUGREPORT << "\n";

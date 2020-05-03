@@ -5,7 +5,7 @@
 #include "baldr/rapidjson_utils.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include "baldr/graphreader.h"
@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-namespace bpo = boost::program_options;
+;
 
 using namespace valhalla::baldr;
 using namespace valhalla::midgard;
@@ -54,7 +54,7 @@ boost::filesystem::path config_file_path;
 bool ParseArguments(int argc, char* argv[]) {
   std::vector<std::string> input_files;
 
-  bpo::options_description options(
+  cxxopts::options_description options(
       " Usage: valhalla_land_tiles [options]\n"
       "valhalla_land_tiles is a program that creates a list of base lat,lng for 1 degree "
       "tiles that include Valhalla data.\n");
@@ -62,20 +62,20 @@ bool ParseArguments(int argc, char* argv[]) {
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
       "config,c",
-      boost::program_options::value<boost::filesystem::path>(&config_file_path)->required(),
+      cxxopts::value<boost::filesystem::path>(&config_file_path)->required(),
       "Path to the json configuration file.")
       // positional arguments
       ("input_files",
-       boost::program_options::value<std::vector<std::string>>(&input_files)->multitoken());
+       cxxopts::value<std::vector<std::string>>(&input_files)->multitoken());
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("input_files", 16);
 
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
 
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"

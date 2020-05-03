@@ -195,6 +195,7 @@ target_include_directories(valhalla
     ${VALHALLA_SOURCE_DIR}/third_party/rapidjson/include
     ${VALHALLA_SOURCE_DIR}/third_party/date/include
     $<$<BOOL:${MSVC}>:${VALHALLA_SOURCE_DIR}/third_party/dirent/include>
+    ${VALHALLA_SOURCE_DIR}/third_party/cxxopts/include
   PRIVATE
     ${libvalhalla_include_directories})
 

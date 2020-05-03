@@ -5,7 +5,7 @@
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <fstream>
 #include <iostream>
@@ -27,7 +27,7 @@ using namespace valhalla::midgard;
 using namespace valhalla::baldr;
 using namespace valhalla::mjolnir;
 
-namespace bpo = boost::program_options;
+;
 
 Transit read_pbf(const std::string& file_name) {
   std::fstream file(file_name, std::ios::in | std::ios::binary);
@@ -359,7 +359,7 @@ GraphId GetGraphId(Transit& transit, const std::string& onestop_id) {
 
 // Main method for testing a single path
 int main(int argc, char* argv[]) {
-  bpo::options_description options(
+  cxxopts::options_description options(
       "transit_stop_query\n"
       "\nUsage: transit_stop_query [options]\n"
       "transit_stop_query is a simple command line test tool to log transit stop info."
@@ -371,29 +371,29 @@ int main(int argc, char* argv[]) {
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
       "o_lat,o_y",
-      boost::program_options::value<float>(
+      cxxopts::value<float>(
           &o_lat))("o_lng,o_x",
-                   boost::program_options::value<float>(
+                   cxxopts::value<float>(
                        &o_lng))("d_lat,d_y",
-                                boost::program_options::value<float>(
+                                cxxopts::value<float>(
                                     &d_lat))("d_lng,d_x",
-                                             boost::program_options::value<float>(
+                                             cxxopts::value<float>(
                                                  &d_lng))("o_onestop_id,o",
-                                                          boost::program_options::value<std::string>(
+                                                          cxxopts::value<std::string>(
                                                               &o_onestop_id))(
       "d_onestop_id,d",
-      boost::program_options::value<std::string>(
+      cxxopts::value<std::string>(
           &d_onestop_id))("tripid,i",
-                          boost::program_options::value<int>(
+                          cxxopts::value<int>(
                               &tripid))("time,t",
-                                        boost::program_options::value<std::string>(
-                                            &time))("conf,c", bpo::value<std::string>(&config),
+                                        cxxopts::value<std::string>(
+                                            &time))("conf,c", cxxopts::value<std::string>(&config),
                                                     "Valhalla configuration file");
 
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::parse_command_line(argc, argv, options), vm);
-    bpo::notify(vm);
+    cxxopts::store(cxxopts::parse_command_line(argc, argv, options), vm);
+    cxxopts::notify(vm);
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what();
     return EXIT_FAILURE;

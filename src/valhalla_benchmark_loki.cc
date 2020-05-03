@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <atomic>
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <fstream>
 #include <future>
@@ -22,7 +22,7 @@
 #include <valhalla/sif/costfactory.h>
 #include <vector>
 
-namespace bpo = boost::program_options;
+;
 
 filesystem::path config_file_path;
 size_t threads =
@@ -81,7 +81,7 @@ using results_t = std::set<result_t>;
 
 int ParseArguments(int argc, char* argv[]) {
 
-  bpo::options_description options(
+  cxxopts::options_description options(
       "search " VALHALLA_VERSION "\n"
       "\n"
       " Usage: loki_benchmark [options] <location_input_file> ...\n"
@@ -95,31 +95,31 @@ int ParseArguments(int argc, char* argv[]) {
   std::string search_type;
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
-      "config,c", boost::program_options::value<filesystem::path>(&config_file_path),
+      "config,c", cxxopts::value<filesystem::path>(&config_file_path),
       "Path to the json configuration file.")(
-      "threads,t", boost::program_options::value<size_t>(&threads),
-      "Concurrency to use.")("batch,b", boost::program_options::value<size_t>(&batch),
+      "threads,t", cxxopts::value<size_t>(&threads),
+      "Concurrency to use.")("batch,b", cxxopts::value<size_t>(&batch),
                              "Number of locations to group together per search")(
-      "extrema,e", boost::program_options::value<bool>(&extrema),
+      "extrema,e", cxxopts::value<bool>(&extrema),
       "Show the input locations of the extrema for a given statistic")(
-      "reach,i", boost::program_options::value<size_t>(&isolated),
+      "reach,i", cxxopts::value<size_t>(&isolated),
       "How many edges need to be reachable before considering it as connected to the larger "
-      "network")("radius,r", boost::program_options::value<size_t>(&radius),
+      "network")("radius,r", cxxopts::value<size_t>(&radius),
                  "How many meters to search away from the input location")(
-      "costing", boost::program_options::value<std::string>(&costing_str),
+      "costing", cxxopts::value<std::string>(&costing_str),
       "Which costing model to use.")
       // positional arguments
       ("input_files",
-       boost::program_options::value<std::vector<std::string>>(&input_files)->multitoken());
+       cxxopts::value<std::vector<std::string>>(&input_files)->multitoken());
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("input_files", 16);
 
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
 
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"

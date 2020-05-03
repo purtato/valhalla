@@ -1,5 +1,5 @@
 #include "baldr/rapidjson_utils.h"
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <cstdint>
 
@@ -18,7 +18,7 @@
 using namespace valhalla::midgard;
 using namespace valhalla::baldr;
 
-namespace bpo = boost::program_options;
+;
 
 // global options instead of passing them around
 std::string column_separator{'\0'};
@@ -154,7 +154,7 @@ void extend(GraphReader& reader,
 
 // program entry point
 int main(int argc, char* argv[]) {
-  bpo::options_description options("valhalla_export_edges " VALHALLA_VERSION "\n"
+  cxxopts::options_description options("valhalla_export_edges " VALHALLA_VERSION "\n"
                                    "\n"
                                    " Usage: valhalla_export_edges [options]\n"
                                    "\n"
@@ -165,22 +165,22 @@ int main(int argc, char* argv[]) {
 
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
-      "column,c", bpo::value<std::string>(&column_separator),
+      "column,c", cxxopts::value<std::string>(&column_separator),
       "What separator to use between columns [default=\\0].")(
-      "row,r", bpo::value<std::string>(&column_separator),
+      "row,r", cxxopts::value<std::string>(&column_separator),
       "What separator to use between row [default=\\n].")("ferries,f",
                                                           "Export ferries as well [default=false]")(
       "unnamed,u", "Export unnamed edges as well [default=false]")
       // positional arguments
-      ("config", bpo::value<std::string>(&config), "Valhalla configuration file [required]");
+      ("config", cxxopts::value<std::string>(&config), "Valhalla configuration file [required]");
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("config", 1);
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"
               << "This is a bug, please report it at " PACKAGE_BUGREPORT << "\n";

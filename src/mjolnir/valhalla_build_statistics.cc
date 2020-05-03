@@ -4,7 +4,7 @@
 
 #include "baldr/rapidjson_utils.h"
 #include <boost/format.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <future>
 #include <iostream>
@@ -33,7 +33,7 @@ using namespace valhalla::midgard;
 using namespace valhalla::baldr;
 using namespace valhalla::mjolnir;
 
-namespace bpo = boost::program_options;
+;
 filesystem::path config_file_path;
 
 namespace {
@@ -574,17 +574,17 @@ void BuildStatistics(const boost::property_tree::ptree& pt) {
 }
 
 bool ParseArguments(int argc, char* argv[]) {
-  bpo::options_description options("Usage: valhalla_build_statistics --config conf/valhalla.json");
+  cxxopts::options_description options("Usage: valhalla_build_statistics --config conf/valhalla.json");
   options.add_options()("help,h",
                         "Print this help message")("config,c",
-                                                   boost::program_options::value<filesystem::path>(
+                                                   cxxopts::value<filesystem::path>(
                                                        &config_file_path)
                                                        ->required(),
                                                    "Path to the json configuration file.");
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).run(), vm);
-    bpo::notify(vm);
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).run(), vm);
+    cxxopts::notify(vm);
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n";
     return false;

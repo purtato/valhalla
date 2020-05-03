@@ -15,7 +15,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iterator/reverse_iterator.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <algorithm>
@@ -38,7 +38,7 @@ namespace vj = valhalla::mjolnir;
 namespace pbf = opentraffic::osmlr;
 
 namespace bal = boost::algorithm;
-namespace bpo = boost::program_options;
+;
 namespace bpt = boost::property_tree;
 namespace bfs = filesystem;
 
@@ -954,7 +954,7 @@ int main(int argc, char** argv) {
   std::string config, tile_dir;
   unsigned int num_threads = 1;
 
-  bpo::options_description options(
+  cxxopts::options_description options(
       "valhalla_associate_segments " VALHALLA_VERSION "\n"
       "\n"
       " Usage: valhalla_associate_segments [options]\n"
@@ -965,19 +965,19 @@ int main(int argc, char** argv) {
 
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
-      "osmlr-tile-dir,t", bpo::value<std::string>(&tile_dir),
-      "Location of traffic segment tiles.")("concurrency,j", bpo::value<unsigned int>(&num_threads),
+      "osmlr-tile-dir,t", cxxopts::value<std::string>(&tile_dir),
+      "Location of traffic segment tiles.")("concurrency,j", cxxopts::value<unsigned int>(&num_threads),
                                             "Number of threads to use.")
       // positional arguments
-      ("config", bpo::value<std::string>(&config), "Valhalla configuration file [required]");
+      ("config", cxxopts::value<std::string>(&config), "Valhalla configuration file [required]");
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("config", 1);
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"
               << "This is a bug, please report it at " PACKAGE_BUGREPORT << "\n";

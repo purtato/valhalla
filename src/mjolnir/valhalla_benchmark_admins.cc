@@ -22,7 +22,7 @@
 #include <boost/geometry/io/wkt/wkt.hpp>
 #include <boost/geometry/multi/geometries/multi_polygon.hpp>
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include "baldr/admininfo.h"
@@ -42,7 +42,7 @@
 // sqlite is included in util.h and must be before spatialite
 #include <spatialite.h>
 
-namespace bpo = boost::program_options;
+;
 using namespace valhalla::midgard;
 using namespace valhalla::baldr;
 
@@ -209,7 +209,7 @@ void Benchmark(const boost::property_tree::ptree& pt) {
 
 bool ParseArguments(int argc, char* argv[]) {
   std::vector<std::string> input_files;
-  bpo::options_description options("adminbenchmark " VALHALLA_VERSION "\n"
+  cxxopts::options_description options("adminbenchmark " VALHALLA_VERSION "\n"
                                    "\n"
                                    " Usage: adminbenchmark [options] \n"
                                    "\n"
@@ -219,15 +219,15 @@ bool ParseArguments(int argc, char* argv[]) {
 
   options.add_options()("help,h", "Print this help message.")("version,v",
                                                               "Print the version of this software.")(
-      "config,c", boost::program_options::value<filesystem::path>(&config_file_path)->required(),
+      "config,c", cxxopts::value<filesystem::path>(&config_file_path)->required(),
       "Path to the json configuration file.");
 
-  bpo::positional_options_description pos_options;
-  bpo::variables_map vm;
+  cxxopts::positional_options_description pos_options;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
 
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"

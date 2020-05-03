@@ -2,13 +2,13 @@
 #include "baldr/rapidjson_utils.h"
 #include "filesystem.h"
 
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <string>
 
 #include "config.h"
 
-namespace bpo = boost::program_options;
+;
 namespace bpt = boost::property_tree;
 
 int main(int argc, char** argv) {
@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
   std::string inline_config;
   std::string config_file_path;
 
-  bpo::options_description options("valhalla_expand_bounding_box " VALHALLA_VERSION "\n"
+  cxxopts::options_description options("valhalla_expand_bounding_box " VALHALLA_VERSION "\n"
                                    "\n"
                                    " Usage: valhalla_expand_bounding_box [options]\n"
                                    "\n"
@@ -28,20 +28,20 @@ int main(int argc, char** argv) {
   auto adder = options.add_options();
   adder("help,h", "Print this help message.");
   adder("version,v", "Print the version of this software.");
-  adder("config,c", bpo::value<std::string>(&config_file_path),
+  adder("config,c", cxxopts::value<std::string>(&config_file_path),
         "Path to the json configuration file.");
-  adder("inline-config,i", bpo::value<std::string>(&inline_config), "Inline json config.");
+  adder("inline-config,i", cxxopts::value<std::string>(&inline_config), "Inline json config.");
   adder(
-      "bounding-box,b", bpo::value<std::string>(&bbox),
+      "bounding-box,b", cxxopts::value<std::string>(&bbox),
       "Bounding box to expand. The format is lower left lng/lat and upper right lng/lat or min_x,min_y,max_x,max_y");
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("bounding-box", 1);
-  bpo::variables_map vm;
+  cxxopts::variables_map vm;
   try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
+    cxxopts::store(cxxopts::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
                vm);
-    bpo::notify(vm);
+    cxxopts::notify(vm);
   } catch (std::exception& e) {
     std::cerr << "Unable to parse command line options because: " << e.what() << "\n"
               << "This is a bug, please report it at " PACKAGE_BUGREPORT << "\n";

@@ -8,15 +8,13 @@ using namespace valhalla::mjolnir;
 
 #include "baldr/rapidjson_utils.h"
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <cxxopts.hpp>
 #include <iostream>
 
 #include "filesystem.h"
 #include "midgard/logging.h"
 #include "midgard/util.h"
-
-namespace bpo = boost::program_options;
 
 // List the build stages
 void list_stages() {
@@ -34,41 +32,27 @@ int main(int argc, char** argv) {
   std::string start_stage_str = "initialize";
   std::string end_stage_str = "cleanup";
   std::vector<std::string> input_files;
-  bpo::options_description options(
+  // clang-format off
+  cxxopts::Options options(
       "valhalla_build_tiles " VALHALLA_VERSION "\n\n"
       "Usage: valhalla_build_tiles [options] <protocolbuffer_input_file>\n\n"
       "valhalla_build_tiles is a program that creates the route graph from an osm.pbf "
       "extract. Sample json configs are located in ../conf directory.\n\n");
 
-  options.add_options()("help,h", "Print this help message.")("version,v",
-                                                              "Print the version of this software.")(
-      "config,c", boost::program_options::value<std::string>(&config_file_path),
-      "Path to the json configuration file.")("inline-config,i",
-                                              boost::program_options::value<std::string>(
-                                                  &inline_config),
-                                              "Inline json config.")(
-      "start,s", boost::program_options::value<std::string>(&start_stage_str),
-      "Starting stage of the build pipeline")("end,e",
-                                              boost::program_options::value<std::string>(
-                                                  &end_stage_str),
-                                              "End stage of the build pipeline")
-
+  options.add_options()
+      ("help,h", "Print this help message.")
+      ("version,v","Print the version of this software.")
+      ("config,c", cxxopts::value<std::string>(&config_file_path),"Path to the json configuration file.")
+      ("inline-config,i",cxxopts::value<std::string>(&inline_config),"Inline json config.")
+      ("start,s", cxxopts::value<std::string>(&start_stage_str),"Starting stage of the build pipeline")
+      ("end,e", cxxopts::value<std::string>(&end_stage_str),"End stage of the build pipeline")
       // positional arguments
-      ("input_files",
-       boost::program_options::value<std::vector<std::string>>(&input_files)->multitoken());
+      ("input_files", cxxopts::value<std::vector<std::string>>(&input_files)->multitoken());
+  // clang-format on
 
-  bpo::positional_options_description pos_options;
+  cxxopts::positional_options_description pos_options;
   pos_options.add("input_files", 16);
-  bpo::variables_map vm;
-  try {
-    bpo::store(bpo::command_line_parser(argc, argv).options(options).positional(pos_options).run(),
-               vm);
-    bpo::notify(vm);
-
-  } catch (std::exception& e) {
-    std::cerr << "Unable to parse command line options because: " << e.what() << "\n";
-    return EXIT_FAILURE;
-  }
+  auto vm = options.parse(argc, argv);
 
   // Print out help or version and return
   if (vm.count("help")) {
