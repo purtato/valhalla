@@ -1,7 +1,9 @@
 #include "baldr/rapidjson_utils.h"
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <cstdint>
+#include <sstream>
 
 #include "baldr/graphconstants.h"
 #include "baldr/graphreader.h"
@@ -152,11 +154,37 @@ void extend(GraphReader& reader,
 
 } // namespace
 
+std::string asWktLinestring(std::list<PointLL> shape) {
+    std::stringstream ss;
+    ss << "Linestring (";
+    for (const auto& p : shape) {
+        ss << std::to_string(p.lng()) << " " << std::to_string(p.lat()) << ",";
+    }
+    ss.seekp(-1,ss.cur);
+    ss << ")";
+    return ss.str();
+}
+
+bool hasMin2Points(std::list<PointLL> shape) {
+    if (shape.size() <= 1) return false;
+
+    PointLL prev;
+    bool first = true;
+    for (const auto& p : shape) {
+           if (!first && (std::to_string(p.lng()) != std::to_string(prev.lng()) || std::to_string(p.lat()) != std::to_string(prev.lat()))) {
+                return true;
+           }
+           first = false;
+           prev = p;
+    }
+    return false;
+}
+
 // program entry point
 int main(int argc, char* argv[]) {
   bpo::options_description options("valhalla_export_edges " VALHALLA_VERSION "\n"
                                    "\n"
-                                   " Usage: valhalla_export_edges [options]\n"
+                                   "Usage: valhalla_export_edges [options]\n"
                                    "\n"
                                    "valhalla_export_edges is a simple command line test tool which "
                                    "dumps information about each graph edge. "
@@ -217,8 +245,12 @@ int main(int argc, char* argv[]) {
   uint64_t edge_count = 0;
   for (const auto& level : TileHierarchy::levels()) {
     for (uint32_t i = 0; i < level.second.tiles.TileCount(); ++i) {
-      GraphId tile_id{i, level.first, 0};
-      if (reader.DoesTileExist(tile_id)) {
+      uint32_t id = 0;
+      while (true) {
+        GraphId tile_id{i, level.first, id++};
+        if (!reader.DoesTileExist(tile_id)) {
+            break;
+        }
         // TODO: just read the header, parsing the whole thing isnt worth it at this point
         tile_set.emplace(tile_id, edge_count);
         const auto* tile = reader.GetGraphTile(tile_id);
@@ -240,6 +272,7 @@ int main(int argc, char* argv[]) {
   LOG_INFO("Exporting " + std::to_string(edge_count) + " edges");
   int progress = -1;
   uint64_t set = 0;
+  uint64_t skipped = 0;
   for (const auto& tile_count_pair : tile_set) {
     // for each edge in the tile
     reader.Clear();
@@ -257,6 +290,7 @@ int main(int argc, char* argv[]) {
       // make sure we dont ever look at this again
       edge_t edge{tile_count_pair.first, tile->directededge(i)};
       edge.i.set_id(i);
+      auto edge_id = edge.i.value;
       edge_set.set(tile_count_pair.second + i);
       ++set;
 
@@ -286,62 +320,20 @@ int main(int argc, char* argv[]) {
         continue;
       }
 
-      // TODO: at this point we need to traverse the graph from this edge to build a subgraph of
-      // like-named connected edges. what we would like is that from that subgraph we extract
-      // linestrings which are of the maximum length. this makes people's lives easier downstream.
-      // finding such segments is NP-Hard and indeed even verifying a solution is NP-Complete. there
-      // are some tricks though.. you can do this in linear time if your subgraph is a DAG. this
-      // can't be guaranteed in the overall graph, but we can create the subgraphs in such a way
-      // that
-      // they are DAGs. this can produce suboptimal results however and depends on the initial edge.
-      // so for now we'll just greedily export edges
-
-      // keep some state about this section of road
-      std::list<edge_t> edges{edge};
-
-      // go forward
-      const auto* t = tile;
-      while ((edge = next(tile_set, edge_set, reader, t, edge, names))) {
-        // mark them to never be used again
-        edge_set.set(tile_set.find(edge.i.Tile_Base())->second + edge.i.id());
-        edge_t other = opposing(reader, t, edge);
-        if (other.e == nullptr) {
-          continue;
-        }
-        edge_set.set(tile_set.find(other.i.Tile_Base())->second + other.i.id());
-        set += 2;
-        // keep this
-        edges.push_back(edge);
-      }
-
-      // go backward
-      edge = opposing_edge;
-      while ((edge = next(tile_set, edge_set, reader, t, edge, names))) {
-        // mark them to never be used again
-        edge_set.set(tile_set.find(edge.i.Tile_Base())->second + edge.i.id());
-        edge_t other = opposing(reader, t, edge);
-        if (other.e == nullptr) {
-          continue;
-        }
-        edge_set.set(tile_set.find(other.i.Tile_Base())->second + other.i.id());
-        set += 2;
-        // keep this
-        edges.push_front(other);
-      }
-
-      // get the shape
-      std::list<PointLL> shape;
-      for (const auto& e : edges) {
-        extend(reader, t, e, shape);
-      }
+      auto info = tile->edgeinfo(edge.e->edgeinfo_offset());
+      auto shape = valhalla::midgard::decode7<std::list<PointLL>>(info.encoded_shape());
 
       // output it as: shape,name,name,...
-      auto encoded = encode(shape);
-      std::cout << encoded << column_separator;
-      for (const auto& name : names) {
-        std::cout << name << (&name == &names.back() ? "" : column_separator);
+      if (!hasMin2Points(shape)) {
+        ++skipped;
+        continue;
       }
-      std::cout << row_separator;
+      auto encoded = asWktLinestring(shape);
+      std::cout << edge_info.wayid() << column_separator << edge_id << column_separator << "\"" << encoded << "\"" << column_separator << "\"";
+      for (const auto& name : names) {
+        std::cout << boost::replace_all_copy(name, "\"", "\"\"") << (&name == &names.back() ? "" : ",");
+      }
+      std::cout << "\"" << row_separator;
       std::cout.flush();
     }
 
@@ -351,7 +343,7 @@ int main(int argc, char* argv[]) {
       LOG_INFO(std::to_string(progress = procent) + "%");
     }
   }
-  LOG_INFO("Done");
+  LOG_INFO("Done, skipped: " + std::to_string(skipped));
 
   for (uint64_t i = 0; i < edge_count; ++i) {
     if (!edge_set.get(i)) {
