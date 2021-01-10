@@ -329,12 +329,58 @@ int main(int argc, char* argv[]) {
         continue;
       }
       auto encoded = asWktLinestring(shape);
-      std::cout << edge_info.wayid() << column_separator << edge_id << column_separator << "\"" << encoded << "\"" << column_separator << "\"";
+
+      auto tile2 = tile;
+      if (tile2->id() != opposing_edge.e->endnode().Tile_Base()) {
+        tile2 = reader.GetGraphTile(opposing_edge.e->endnode());
+      }
+      const auto* start_node2 = tile2->node(opposing_edge.e->endnode());
+      auto dri2 = (int) start_node2->local_driveability(opposing_edge.e->localedgeidx());
+
+      auto tile3 = tile;
+      if (tile3->id() != edge.e->endnode().Tile_Base()) {
+        tile3 = reader.GetGraphTile(edge.e->endnode());
+      }
+      const auto* start_node = tile3->node(edge.e->endnode());
+      auto dri = (int) start_node->local_driveability(edge.e->localedgeidx());
+
+      std::cout << edge_info.wayid() << column_separator << edge_id << column_separator << dri2 << column_separator << dri << column_separator << edge.e->endnode().value << column_separator << "\"" << encoded << "\"" << column_separator << "\"";
       for (const auto& name : names) {
         std::cout << boost::replace_all_copy(name, "\"", "\"\"") << (&name == &names.back() ? "" : ",");
       }
       std::cout << "\"" << row_separator;
       std::cout.flush();
+
+      //const auto* start_node = opposing_edge.e->endnode()
+
+//    for (size_t i = 0; i < start_node->edge_count(); ++i) {
+//
+//    }
+      //std::cout << "Node: " << edge.e->endnode().value << column_separator << dri << row_separator;
+//      const auto* node = tile2->node(edge.e->endnode());
+//
+//      for (size_t i = 0; i < node->edge_count(); ++i) {
+//        // get the edge
+//        auto tile3 = tile2;
+//        //if (node->edge_index() + i != tile3->id().Tile_Base()) {
+//          tile3 = reader.GetGraphTile(edge.e->endnode());
+//        //}
+//        GraphId id = GraphId(tile3->id().value);
+//        id.set_id(node->edge_index() + i);
+//        auto x = tile3->directededge(id);
+//        //auto x = tile->directededge(node->edge_index() + i);
+//        std::cout << "\t" << column_separator << id.value << "(" << id.level() << "|" << id.tileid() << "|" << id.id() << ")" << row_separator;//x->length();
+//      }
+      //std::cout << row_separator;
+      std::cout.flush();
+
+
+//      const auto* node = tile->node(edge.e->endnode());
+//      auto start_index = node.edge_index()
+//      for (auto i = start_index; i < start_index + node.edge_count(); ++i) {
+//         auto e = tile->directededge(i)
+//         e.
+//      }
     }
 
     // check progress
