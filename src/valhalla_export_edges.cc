@@ -322,8 +322,7 @@ int main(int argc, char* argv[]) {
         ++skipped;
         continue;
       }
-      auto encoded = asWktLinestring(shape);
-      std::cout << edge_info.wayid() << column_separator << edge_id << column_separator << "\"" << encoded << "\"" << column_separator << "\"";
+      std::cout << edge_id << column_separator << edge_info.wayid() << column_separator << "\"" << info.encoded_shape() << "\"" << column_separator << "\"";
       for (const auto& name : names) {
         std::cout << boost::replace_all_copy(name, "\"", "\"\"") << (&name == &names.back() ? "" : ",");
       }
