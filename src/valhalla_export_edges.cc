@@ -239,7 +239,7 @@ int main(int argc, char* argv[]) {
     for (uint32_t i = 0; i < level.tiles.TileCount(); ++i) {
       uint32_t id = 0;
       while (true) {
-        GraphId tile_id{i, level.first, id++};
+        GraphId tile_id{i, level.level, id++};
         if (!reader.DoesTileExist(tile_id)) {
             break;
         }
@@ -323,7 +323,7 @@ int main(int argc, char* argv[]) {
         continue;
       }
       auto encoded = asWktLinestring(shape);
-      std::cout << edge_info.wayid() << column_separator << edge_id << column_separator << "\"" << encoded << "\"" << column_separator << "\"";
+      std::cout << edge_id << column_separator << edge_info.wayid() << column_separator << "\"" << encoded << "\"" << column_separator << "\"";
       for (const auto& name : names) {
         std::cout << boost::replace_all_copy(name, "\"", "\"\"") << (&name == &names.back() ? "" : ",");
       }
